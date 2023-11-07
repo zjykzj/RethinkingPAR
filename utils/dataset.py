@@ -49,7 +49,6 @@ class RethinkingPARDataset(Dataset):
         # PETA_zs use 35 attributes to train/eval
         self.eval_attr_idx = dataset_info.label_idx.eval
         self.attr_name = [dataset_info.attr_name[i] for i in self.eval_attr_idx]
-        self.attr_name = [dataset_info.attr_name[i] for i in self.eval_attr_idx]
 
         assert split in dataset_info.partition.keys(), f'split {split} is not exist'
         self.image_idx_list = dataset_info.partition[split]
@@ -102,6 +101,7 @@ if __name__ == '__main__':
     data_root = "/mnt/c/zj/repos/Rethinking_of_PAR/data/PETA/"
     dataset = RethinkingPARDataset(data_root, split='trainval')
     print(dataset, len(dataset))
+    print(dataset.attr_name)
 
     for _ in range(5):
         index = np.random.choice(range(len(dataset)))
