@@ -26,7 +26,6 @@ def parse_opt():
 
     parser.add_argument('pretrained', metavar='PRETRAINED', type=str, default="rethinking_par-e100.pth",
                         help='path to pretrained model')
-
     parser.add_argument('--backbone', metavar='BACKBONE', type=str, default='resnet50', choices=backbone_dict.keys(),
                         help='model architecture: ' + ' | '.join(backbone_dict.keys()) + ' (default: resnet50)')
     parser.add_argument('--num_attr', metavar='ATTR', type=int, default=35,
