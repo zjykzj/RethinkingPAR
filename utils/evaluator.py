@@ -104,9 +104,9 @@ class Evaluator:
         self.gt_labels.extend(targets)
         self.pred_probs.extend(outputs)
 
-        result = get_pedestrian_metrics(targets, outputs)
-        return result.instance_acc
+        res_dict = get_pedestrian_metrics(targets, outputs)
+        return res_dict
 
     def result(self):
-        result = get_pedestrian_metrics(np.array(self.gt_labels), np.array(self.pred_probs))
-        return result.instance_acc
+        res_dict = get_pedestrian_metrics(np.array(self.gt_labels), np.array(self.pred_probs))
+        return res_dict
