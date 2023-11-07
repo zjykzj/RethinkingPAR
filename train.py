@@ -12,6 +12,7 @@ import os.path
 import time
 
 from tqdm import tqdm
+from easydict import EasyDict
 
 import torch
 import torch.optim as optim
@@ -38,10 +39,10 @@ def parse_opt():
     parser.add_argument('data_root', metavar='DIR', type=str, help='path to PETA dataset')
     parser.add_argument('output', metavar='OUTPUT', type=str, help='path to output')
 
-    parser.add_argument('--backbone', metavar='BACKBONE', type=str, default='resnet18', choices=backbone_dict.keys(),
-                        help='model architecture: ' + ' | '.join(backbone_dict.keys()) + ' (default: resnet18)')
+    parser.add_argument('--backbone', metavar='BACKBONE', type=str, default='resnet50', choices=backbone_dict.keys(),
+                        help='model architecture: ' + ' | '.join(backbone_dict.keys()) + ' (default: resnet50)')
     parser.add_argument('--num_attr', metavar='ATTR', type=int, default=35,
-                        help='number of attributes. Default: 35')
+                        help='number of attributes. Default: 35 attributes for PETA_zs')
 
     parser.add_argument('--batch-size', type=int, default=32, help='total batch size for all GPUs, -1 for autobatch')
 
@@ -70,13 +71,6 @@ def train(opt, device):
 
     LOGGER.info("=> Create Model")
     model = Baseline(backbone, num_attr).to(device)
-    # RuntimeError: torch.nn.functional.binary_cross_entropy and torch.nn.BCELoss are unsafe to autocast.
-    # Many models use a sigmoid layer right before the binary cross entropy layer.
-    # In this case, combine the two layers using torch.nn.functional.binary_cross_entropy_with_logits
-    # or torch.nn.BCEWithLogitsLoss.  binary_cross_entropy_with_logits and BCEWithLogits are
-    # safe to autocast.
-    # criterion = BCELoss().to(device)
-    criterion = BCEWithLogitsLoss().to(device)
 
     learn_rate = 0.001 * WORLD_SIZE
     weight_decay = 1e-5
@@ -86,6 +80,7 @@ def train(opt, device):
 
     LOGGER.info("=> Load data")
     train_dataset = RethinkingPARDataset(data_root, dataset='PETA', split="trainval", height=256, width=192)
+    # train_dataset = RethinkingPARDataset(data_root, dataset='PETA', split="trainval", height=256, width=128)
     sampler = None if LOCAL_RANK == -1 else distributed.DistributedSampler(train_dataset, shuffle=True)
     train_dataloader = DataLoader(train_dataset,
                                   batch_size=batch_size,
@@ -96,16 +91,29 @@ def train(opt, device):
                                   pin_memory=True)
     if RANK in {-1, 0}:
         val_dataset = RethinkingPARDataset(data_root, dataset='PETA', split="test", height=256, width=192)
+        # val_dataset = RethinkingPARDataset(data_root, dataset='PETA', split="test", height=256, width=128)
         val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4, drop_last=False,
                                     pin_memory=True)
 
         LOGGER.info("=> Load evaluator")
         evaluator = Evaluator()
 
+    LOGGER.info("=> Load criterion")
+    # RuntimeError: torch.nn.functional.binary_cross_entropy and torch.nn.BCELoss are unsafe to autocast.
+    # Many models use a sigmoid layer right before the binary cross entropy layer.
+    # In this case, combine the two layers using torch.nn.functional.binary_cross_entropy_with_logits
+    # or torch.nn.BCEWithLogitsLoss.  binary_cross_entropy_with_logits and BCEWithLogits are
+    # safe to autocast.
+    # criterion = BCELoss().to(device)
+
+    label_ratio = train_dataset.label_list.mean(0)
+    print(train_dataset.label_list.shape, label_ratio.shape)
+    criterion = BCEWithLogitsLoss(torch.from_numpy(label_ratio)).to(device)
+
     LOGGER.info("=> Start training")
     t0 = time.time()
     amp = True
-    scaler = torch.cuda.amp.GradScaler(enabled=amp)
+    # scaler = torch.cuda.amp.GradScaler(enabled=amp)
 
     # DDP mode
     cuda = device.type != 'cpu'
@@ -129,19 +137,19 @@ def train(opt, device):
             images = images.to(device)
             targets = targets.to(device)
 
-            with torch.cuda.amp.autocast(amp):
-                outputs = model(images)
-                loss = criterion(outputs, targets)
-            scaler.scale(loss).backward()
-            # loss.backward()
+            # with torch.cuda.amp.autocast(amp):
+            outputs = model(images)
+            loss = criterion(outputs, targets)
+            # scaler.scale(loss).backward()
+            loss.backward()
 
             if epoch <= warmup_epoch:
                 adjust_learning_rate(learn_rate, warmup_epoch, optimizer, epoch - 1, idx, len(train_dataloader))
 
-            scaler.step(optimizer)  # optimizer.step
-            scaler.update()
-            # optimizer.step()
-            # optimizer.zero_grad()
+            # scaler.step(optimizer)  # optimizer.step
+            # scaler.update()
+            optimizer.step()
+            optimizer.zero_grad()
 
             if RANK in {-1, 0}:
                 lr = optimizer.param_groups[0]["lr"]
@@ -150,7 +158,7 @@ def train(opt, device):
 
         if RANK in {-1, 0} and epoch % 5 == 0 and epoch > 0:
             model.eval()
-            save_path = os.path.join(output, f"rethinking-par-e{epoch}.pth")
+            save_path = os.path.join(output, f"rethinking_par-e{epoch}.pth")
             LOGGER.info(f"Save to {save_path}")
             torch.save(model.state_dict(), save_path)
 
@@ -162,11 +170,17 @@ def train(opt, device):
                     outputs = model(images).cpu()
                     outputs = torch.sigmoid(outputs)
 
-                acc = evaluator.update(outputs.numpy(), targets.numpy())
-                info = f"Batch:{idx} ACC:{acc * 100:.3f}"
+                res_dict = evaluator.update(outputs.numpy(), targets.numpy())
+                assert isinstance(res_dict, EasyDict)
+                info = f"Batch:{idx} mA:{res_dict.ma * 100:.3f} ACC: {res_dict.instance_acc * 100:.3f}"
                 pbar.set_description(info)
-            acc = evaluator.result()
-            LOGGER.info(f"ACC: {acc * 100:.3f}")
+            res_dict = evaluator.result()
+            total_res = f"TOTAL mA:{res_dict.ma * 100:.3f}"
+            total_res += f" ACC: {res_dict.instance_acc * 100:.3f}"
+            total_res += f" PRECISION: {res_dict.instance_prec * 100:.3f}"
+            total_res += f" RECALL: {res_dict.instance_recall * 100:.3f}"
+            total_res += f" F1: {res_dict.instance_f1 * 100:.3f}"
+            print(total_res)
         scheduler.step()
         torch.cuda.empty_cache()
     LOGGER.info(f'\n{epochs} epochs completed in {(time.time() - t0) / 3600:.3f} hours.')
