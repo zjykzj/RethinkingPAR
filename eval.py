@@ -10,6 +10,7 @@
 import argparse
 
 from tqdm import tqdm
+from easydict import EasyDict
 
 import torch
 from torch.utils.data import DataLoader
@@ -20,16 +21,16 @@ from utils.evaluator import Evaluator
 
 
 def parse_opt():
-    parser = argparse.ArgumentParser(description='Eval CRNN with EMNIST')
+    parser = argparse.ArgumentParser(description='Eval')
     parser.add_argument('val_root', metavar='DIR', type=str, help='path to val dataset')
 
-    parser.add_argument('pretrained', metavar='PRETRAINED', type=str, default="runs/emnist_ddp/crnn-emnist-e100.pth",
+    parser.add_argument('pretrained', metavar='PRETRAINED', type=str, default="rethinking_par-e100.pth",
                         help='path to pretrained model')
 
-    parser.add_argument('--backbone', metavar='BACKBONE', type=str, default='resnet18', choices=backbone_dict.keys(),
-                        help='model architecture: ' + ' | '.join(backbone_dict.keys()) + ' (default: resnet18)')
+    parser.add_argument('--backbone', metavar='BACKBONE', type=str, default='resnet50', choices=backbone_dict.keys(),
+                        help='model architecture: ' + ' | '.join(backbone_dict.keys()) + ' (default: resnet50)')
     parser.add_argument('--num_attr', metavar='ATTR', type=int, default=35,
-                        help='number of attributes. Default: 35')
+                        help='number of attributes. Default: 35 attributes for PETA_zs')
 
     args = parser.parse_args()
     print(f"args: {args}")
@@ -41,7 +42,7 @@ def val(opt):
     val_root, pretrained, backbone, num_attr = opt.val_root, opt.pretrained, opt.backbone, opt.num_attr
 
     model = Baseline(backbone, num_attr)
-    print(f"Loading CRNN pretrained: {pretrained}")
+    print(f"Loading Baseline pretrained: {pretrained}")
     ckpt = torch.load(pretrained, map_location='cpu')
     ckpt = {k.replace("module.", ""): v for k, v in ckpt.items()}
     model.load_state_dict(ckpt, strict=True)
@@ -60,12 +61,19 @@ def val(opt):
         images = images.to(device)
         with torch.no_grad():
             outputs = model(images).cpu()
+            outputs = torch.sigmoid(outputs)
 
-        acc = emnist_evaluator.update(outputs.numpy(), targets.numpy())
-        info = f"Batch:{idx} ACC:{acc * 100:.3f}"
+        res_dict = emnist_evaluator.update(outputs.numpy(), targets.numpy())
+        assert isinstance(res_dict, EasyDict)
+        info = f"Batch:{idx} mA:{res_dict.ma * 100:.3f} ACC: {res_dict.instance_acc * 100:.3f}"
         pbar.set_description(info)
-    acc = emnist_evaluator.result()
-    print(f"ACC:{acc * 100:.3f}")
+    res_dict = emnist_evaluator.result()
+    total_res = f"TOTAL mA:{res_dict.ma * 100:.3f}"
+    total_res += f" ACC: {res_dict.instance_acc * 100:.3f}"
+    total_res += f" PRECISION: {res_dict.instance_prec * 100:.3f}"
+    total_res += f" RECALL: {res_dict.instance_recall * 100:.3f}"
+    total_res += f" F1: {res_dict.instance_f1 * 100:.3f}"
+    print(total_res)
 
 
 if __name__ == '__main__':
