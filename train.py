@@ -17,7 +17,7 @@ import torch
 import torch.optim as optim
 import torch.distributed as dist
 from torch.utils.data import DataLoader, distributed
-from torch.nn import BCELoss
+from torch.nn import BCEWithLogitsLoss
 
 from utils.model.baseline import Baseline, backbone_dict
 from utils.dataset import RethinkingPARDataset
@@ -70,7 +70,13 @@ def train(opt, device):
 
     LOGGER.info("=> Create Model")
     model = Baseline(backbone, num_attr).to(device)
-    criterion = BCELoss().to(device)
+    # RuntimeError: torch.nn.functional.binary_cross_entropy and torch.nn.BCELoss are unsafe to autocast.
+    # Many models use a sigmoid layer right before the binary cross entropy layer.
+    # In this case, combine the two layers using torch.nn.functional.binary_cross_entropy_with_logits
+    # or torch.nn.BCEWithLogitsLoss.  binary_cross_entropy_with_logits and BCEWithLogits are
+    # safe to autocast.
+    # criterion = BCELoss().to(device)
+    criterion = BCEWithLogitsLoss().to(device)
 
     learn_rate = 0.001 * WORLD_SIZE
     weight_decay = 1e-5
@@ -120,10 +126,11 @@ def train(opt, device):
             pbar = tqdm(pbar)
         optimizer.zero_grad()
         for idx, (images, targets) in enumerate(pbar):
+            images = images.to(device)
             targets = targets.to(device)
 
             with torch.cuda.amp.autocast(amp):
-                outputs = model(images.to(device)).cpu()
+                outputs = model(images)
                 loss = criterion(outputs, targets)
             scaler.scale(loss).backward()
             # loss.backward()
@@ -153,6 +160,7 @@ def train(opt, device):
                 images = images.to(device)
                 with torch.no_grad():
                     outputs = model(images).cpu()
+                    outputs = torch.sigmoid(outputs)
 
                 acc = evaluator.update(outputs.numpy(), targets.numpy())
                 info = f"Batch:{idx} ACC:{acc * 100:.3f}"
