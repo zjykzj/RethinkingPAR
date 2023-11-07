@@ -67,9 +67,9 @@ class RethinkingPARDataset(Dataset):
         if 'train' in split:
             self.transform = transforms.Compose([
                 transforms.Resize((height, width)),
-                transforms.Pad(10),
-                transforms.RandomCrop((height, width)),
-                transforms.RandomHorizontalFlip(),
+                # transforms.Pad(10),
+                # transforms.RandomCrop((height, width)),
+                # transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ])
