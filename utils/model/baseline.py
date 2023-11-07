@@ -55,8 +55,9 @@ class Baseline(nn.Module):
         # [N, C] -> [N, num_attr]
         x = self.fc(x)
 
-        outputs = torch.sigmoid(x)
-        return outputs
+        # outputs = torch.sigmoid(x)
+        # return outputs
+        return x
 
 
 if __name__ == '__main__':
