@@ -7,7 +7,7 @@
 <div align="center"><a title="" href="https://github.com/zjykzj/RethinkingPAR"><img align="center" src="assets/icons/RethinkingPAR.svg" alt=""></a></div>
 
 <p align="center">
-  «RethinkPAR» implements a strong PyTorch baseline for pedestrian attribute recognition 
+  «RethinkPAR» provides a StrongBaseline for pedestrian attribute recognition 
 <br>
 <br>
   <a href="https://github.com/RichardLitt/standard-readme"><img src="https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat-square" alt=""></a>
