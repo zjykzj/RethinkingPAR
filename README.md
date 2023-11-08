@@ -41,11 +41,23 @@ In order to facilitate better research and application of the methods proposed i
 
 ## Installation
 
-...
+```shell
+pip install -r requirements.txt
+```
 
 ## Usage
 
-...
+### Train
+
+```shell
+CUDA_VISIBLE_DEVICES=0 python train.py ../datasets/PETA/ runs/r50_train_b64/ --backbone resnet50 --num_attr 32
+```
+
+### Eval
+
+```shell
+python eval.py ../datasets/PETA/ runs/r50_train_b64/rethinking_par-e95.pth 
+```
 
 ## Maintainers
 
