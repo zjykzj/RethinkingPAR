@@ -44,6 +44,8 @@ class Baseline(nn.Module):
             self.backbone = resnet18(pretrained=True)
         elif 'resnet50' == backbone_type:
             self.backbone = resnet50(pretrained=True)
+        elif 'resnet101' == backbone_type:
+            self.backbone = resnet101(pretrained=True)
         else:
             raise ValueError(f"{backbone_type} does not supports")
 
