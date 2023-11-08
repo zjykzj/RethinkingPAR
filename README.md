@@ -7,7 +7,7 @@
 <div align="center"><a title="" href="https://github.com/zjykzj/RethinkingPAR"><img align="center" src="assets/icons/RethinkingPAR.svg" alt=""></a></div>
 
 <p align="center">
-  «RethinkPAR» provides a StrongBaseline for pedestrian attribute recognition 
+  «RethinkPAR» provides a StrongBaseline for Pedestrian Attribute Recognition 
 <br>
 <br>
   <a href="https://github.com/RichardLitt/standard-readme"><img src="https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat-square" alt=""></a>
@@ -36,8 +36,8 @@
 
 ## Latest News
 
-* ***[2023/11/08][v0.1.1](https://github.com/zjykzj/RethinkingPAR/releases/tag/v0.1.1). Update Loss and Train.***
-* ***[2023/11/07][v0.1.0](https://github.com/zjykzj/RethinkingPAR/releases/tag/v0.1.0). ResNet50 + PETA_zs.***
+* ***[2023/11/08][v0.1.1](https://github.com/zjykzj/RethinkingPAR/releases/tag/v0.1.1). Update BCELoss and Train settings.***
+* ***[2023/11/07][v0.1.0](https://github.com/zjykzj/RethinkingPAR/releases/tag/v0.1.0). Baseline(ResNet50) + PETA_zs.***
 
 ## Background
 
