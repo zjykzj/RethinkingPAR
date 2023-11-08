@@ -51,6 +51,7 @@ def val(opt):
     model = model.to(device)
 
     val_dataset = RethinkingPARDataset(val_root, dataset='PETA', split="test", height=256, width=192)
+    # val_dataset = RethinkingPARDataset(val_root, dataset='PETA', split="test", height=256, width=128)
     val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4, drop_last=False,
                                 pin_memory=True)
     emnist_evaluator = Evaluator()
