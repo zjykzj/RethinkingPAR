@@ -15,6 +15,11 @@
   <a href="http://commitizen.github.io/cz-cli/"><img src="https://img.shields.io/badge/commitizen-friendly-brightgreen.svg" alt=""></a>
 </p>
 
+|                                             | Dataset |   Model  |   mA   |   Acc  |  Prec  |   Rec  |   F1   |
+|:-------------------------------------------:|:-------:|:--------:|:------:|:------:|:------:|:------:|:------:|
+| valencebond/Rethinking_of_PAR(Origin Paper) | PETA_zs | ResNet50 |  71.43 |  58.69 |  74.41 |  69.82 |  72.04 |
+|                  This Repos                 | PETA_zs | ResNet50 | 70.374 | 59.106 | 75.239 | 69.822 | 72.429 |
+
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
@@ -22,6 +27,8 @@
 - [Background](#background)
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Train](#train)
+  - [Eval](#eval)
 - [Maintainers](#maintainers)
 - [Thanks](#thanks)
 - [Contributing](#contributing)
@@ -29,7 +36,8 @@
 
 ## Latest News
 
-...
+* ***[2023/11/08][v0.1.1](https://github.com/zjykzj/RethinkingPAR/releases/tag/v0.1.1). Update Loss and Train.***
+* ***[2023/11/07][v0.1.0](https://github.com/zjykzj/RethinkingPAR/releases/tag/v0.1.0). ResNet50 + PETA_zs.***
 
 ## Background
 
