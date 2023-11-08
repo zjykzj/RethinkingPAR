@@ -67,7 +67,7 @@ def val(opt):
         info = f"Batch:{idx} mA:{res_dict.ma * 100:.3f} ACC: {res_dict.instance_acc * 100:.3f}"
         pbar.set_description(info)
     res_dict = emnist_evaluator.result()
-    total_res = f"TOTAL mA:{res_dict.ma * 100:.3f}"
+    total_res = f"*** TOTAL mA:{res_dict.ma * 100:.3f}"
     total_res += f" ACC: {res_dict.instance_acc * 100:.3f}"
     total_res += f" PRECISION: {res_dict.instance_prec * 100:.3f}"
     total_res += f" RECALL: {res_dict.instance_recall * 100:.3f}"
