@@ -18,8 +18,9 @@ import torch
 import torch.optim as optim
 import torch.distributed as dist
 from torch.utils.data import DataLoader, distributed
-from torch.nn import BCEWithLogitsLoss
+# from torch.nn import BCEWithLogitsLoss
 
+from utils.model.bceloss import BCELoss
 from utils.model.baseline import Baseline, backbone_dict
 from utils.dataset import RethinkingPARDataset
 
@@ -44,7 +45,7 @@ def parse_opt():
     parser.add_argument('--num_attr', metavar='ATTR', type=int, default=35,
                         help='number of attributes. Default: 35 attributes for PETA_zs')
 
-    parser.add_argument('--batch-size', type=int, default=32, help='total batch size for all GPUs, -1 for autobatch')
+    parser.add_argument('--batch-size', type=int, default=64, help='total batch size for all GPUs, -1 for autobatch')
 
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--seed', type=int, default=0, help='Global training seed')
@@ -72,8 +73,8 @@ def train(opt, device):
     LOGGER.info("=> Create Model")
     model = Baseline(backbone, num_attr).to(device)
 
-    learn_rate = 0.001 * WORLD_SIZE
-    weight_decay = 1e-5
+    learn_rate = 0.0001 * WORLD_SIZE
+    weight_decay = 5e-4
     LOGGER.info(f"Final learning rate: {learn_rate}, weight decay: {weight_decay}")
     optimizer = optim.Adam(model.parameters(), lr=learn_rate, weight_decay=weight_decay)
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[40, 70, 90])
@@ -107,8 +108,9 @@ def train(opt, device):
     # criterion = BCELoss().to(device)
 
     label_ratio = train_dataset.label_list.mean(0)
-    print(train_dataset.label_list.shape, label_ratio.shape)
-    criterion = BCEWithLogitsLoss(torch.from_numpy(label_ratio)).to(device)
+    # print(train_dataset.label_list.shape, label_ratio.shape)
+    # criterion = BCEWithLogitsLoss(torch.from_numpy(label_ratio)).to(device)
+    criterion = BCELoss(sample_weight=label_ratio, size_sum=True).to(device)
 
     LOGGER.info("=> Start training")
     t0 = time.time()
@@ -175,7 +177,7 @@ def train(opt, device):
                 info = f"Batch:{idx} mA:{res_dict.ma * 100:.3f} ACC: {res_dict.instance_acc * 100:.3f}"
                 pbar.set_description(info)
             res_dict = evaluator.result()
-            total_res = f"TOTAL mA:{res_dict.ma * 100:.3f}"
+            total_res = f"*** TOTAL mA:{res_dict.ma * 100:.3f}"
             total_res += f" ACC: {res_dict.instance_acc * 100:.3f}"
             total_res += f" PRECISION: {res_dict.instance_prec * 100:.3f}"
             total_res += f" RECALL: {res_dict.instance_recall * 100:.3f}"
