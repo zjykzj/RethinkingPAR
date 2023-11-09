@@ -37,6 +37,7 @@
 
 ## Latest News
 
+* ***[2023/11/09][v0.1.2](https://github.com/zjykzj/RethinkingPAR/releases/tag/v0.1.2). Update ResNet101 training result.***
 * ***[2023/11/08][v0.1.1](https://github.com/zjykzj/RethinkingPAR/releases/tag/v0.1.1). Update BCELoss and Train settings.***
 * ***[2023/11/07][v0.1.0](https://github.com/zjykzj/RethinkingPAR/releases/tag/v0.1.0). Baseline(ResNet50) + PETA_zs.***
 
