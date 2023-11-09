@@ -73,7 +73,7 @@ def train(opt, device):
     LOGGER.info("=> Create Model")
     model = Baseline(backbone, num_attr).to(device)
 
-    learn_rate = 0.0001 * WORLD_SIZE
+    learn_rate = 0.0001 * WORLD_SIZE * (batch_size / 64)
     weight_decay = 5e-4
     LOGGER.info(f"Final learning rate: {learn_rate}, weight decay: {weight_decay}")
     optimizer = optim.Adam(model.parameters(), lr=learn_rate, weight_decay=weight_decay)
