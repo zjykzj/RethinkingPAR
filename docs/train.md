@@ -31,13 +31,31 @@ Size_B: 256/128
             ])
 ```
 
+## Batch_size
+
+```text
+Batch_A: 64
+    * LR: 1e-4
+Batch_B: 256
+    * LR: 4e-4
+```
+
 ## Results
 
-|                      | Dataset |   Model  |   mA   |   Acc  |  Prec  |   Rec  |   F1   |
-|:--------------------:|:-------:|:--------:|:------:|:------:|:------:|:------:|:------:|
-| Size_A + Transform_A | PETA_zs | ResNet50 | 70.374 | 59.106 | 75.239 | 69.822 | 72.429 |
-| Size_B + Transform_A | PETA_zs | ResNet50 | 70.427 | 58.909 | 74.963 | 69.597 | 72.180 |
-| Size_B + Transform_B | PETA_zs | ResNet50 | 69.969 | 58.185 | 74.235 | 69.278 | 71.671 |
+|                      | Dataset |   Model   |     mA     |    Acc     |    Prec    |    Rec     |     F1     |
+|:--------------------:|:-------:|:---------:|:----------:|:----------:|:----------:|:----------:|:----------:|
+| Size_A + Transform_A | PETA_zs | ResNet50  |   70.374   |   59.106   |   75.239   |   69.822   |   72.429   |
+| Size_B + Transform_A | PETA_zs | ResNet50  |   70.427   |   58.909   |   74.963   |   69.597   |   72.180   |
+| Size_B + Transform_B | PETA_zs | ResNet50  |   69.969   |   58.185   |   74.235   |   69.278   |   71.671   |
+| Size_A + Transform_A | PETA_zs | ResNet101 |   71.076   |   59.189   |   74.534   |   70.196   |   72.300   |
+| Size_A + Transform_B | PETA_zs | ResNet101 | **71.980** | **59.809** | **75.486** | **70.583** | **72.952** |
 
-* It seems that `Pad+RandomCrop` have no effect
-* `256x192` works better
+* `Pad+RandomCrop` is not helpful for `ResNet50`, but it can improve the performance of `ResNet101`
+* `256x192` works better than `256x128`
+
+|         | Dataset |  Model   |   mA   |  Acc   |  Prec  |  Rec   |   F1   |
+|:-------:|:-------:|:--------:|:------:|:------:|:------:|:------:|:------:|
+| Batch_A | PETA_zs | ResNet50 | 70.374 | 59.106 | 75.239 | 69.822 | 72.429 |
+| Batch_B | PETA_zs | ResNet50 | 70.512 | 59.106 | 75.327 | 69.551 | 72.324 |
+
+* Increasing `batch_size` has no effect on training results

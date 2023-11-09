@@ -15,10 +15,11 @@
   <a href="http://commitizen.github.io/cz-cli/"><img src="https://img.shields.io/badge/commitizen-friendly-brightgreen.svg" alt=""></a>
 </p>
 
-|                                             | Dataset |   Model  |   mA   |   Acc  |  Prec  |   Rec  |   F1   |
-|:-------------------------------------------:|:-------:|:--------:|:------:|:------:|:------:|:------:|:------:|
-| valencebond/Rethinking_of_PAR(Origin Paper) | PETA_zs | ResNet50 |  71.43 |  58.69 |  74.41 |  69.82 |  72.04 |
-|                  This Repos                 | PETA_zs | ResNet50 | 70.374 | 59.106 | 75.239 | 69.822 | 72.429 |
+|                                             | Dataset |   Model   |     mA     |    Acc     |    Prec    |    Rec     |     F1     |
+|:-------------------------------------------:|:-------:|:---------:|:----------:|:----------:|:----------:|:----------:|:----------:|
+| valencebond/Rethinking_of_PAR(Origin Paper) | PETA_zs | ResNet50  |   71.43    |   58.69    |   74.41    |   69.82    |   72.04    |
+|                 This Repos                  | PETA_zs | ResNet50  |   70.374   |   59.106   |   75.239   |   69.822   |   72.429   |
+|                 This Repos                  | PETA_zs | ResNet101 | **71.980** | **59.809** | **75.486** | **70.583** | **72.952** |
 
 ## Table of Contents
 
