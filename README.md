@@ -27,6 +27,7 @@
 - [Latest News](#latest-news)
 - [Background](#background)
 - [Installation](#installation)
+- [Dataset](#dataset)
 - [Usage](#usage)
   - [Train](#train)
   - [Eval](#eval)
@@ -54,6 +55,15 @@ In order to facilitate better research and application of the methods proposed i
 ```shell
 pip install -r requirements.txt
 ```
+
+## Dataset
+
+The application for the [RAP](https://www.rapdataset.com/) dataset is very complicated and requires filling in relevant records. So this warehouse only uses the [PETA](http://mmlab.ie.cuhk.edu.hk/projects/PETA.html) dataset for experiments
+
+`PETA_zs` used 35 out of the 105 attributes of the original dataset PETA, as detailed in: [PETA （35 in 105）](https://github.com/valencebond/Rethinking_of_PAR/blob/master/dataset/pedes_attr/annotation.md)
+
+* Download link:[Baidu Drive](https://pan.baidu.com/s/1osIhqRmkGNnGBSPtmzS4pQ) 
+* Password: nktm
 
 ## Usage
 
